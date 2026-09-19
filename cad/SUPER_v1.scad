@@ -218,3 +218,5 @@ else if (part == "lid") electronics_lid();
 else if (part == "switch_carrier") switch_carrier();
 else if (part == "fan_grille") fan_grille();
 else main_rack();
+
+// STL build trigger: v1
