@@ -1,0 +1,42 @@
+name: Build STL files
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "cad/**"
+      - ".github/workflows/build-stls.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OpenSCAD
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openscad
+
+      - name: Generate STL files
+        run: |
+          mkdir -p stl
+          openscad --export-format binstl -D 'part="main"' -o stl/SUPER_main.stl cad/SUPER_v1.scad
+          openscad --export-format binstl -D 'part="lid"' -o stl/SUPER_lid.stl cad/SUPER_v1.scad
+          openscad --export-format binstl -D 'part="switch_carrier"' -o stl/SUPER_switch_carrier.stl cad/SUPER_v1.scad
+          openscad --export-format binstl -D 'part="fan_grille"' -o stl/SUPER_fan_grille.stl cad/SUPER_v1.scad
+
+      - name: Commit generated STLs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stl/*.stl
+          if git diff --cached --quiet; then
+            echo "STLs already current."
+          else
+            git commit -m "Build STL files"
+            git push
+          fi
